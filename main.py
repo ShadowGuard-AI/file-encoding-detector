@@ -1,5 +1,6 @@
 import argparse
 import logging
+import sys
 import pathlib
 import chardet
 
@@ -73,8 +74,10 @@ def main():
 
     if encoding:
         print(f"Encoding: {encoding}")
+        sys.exit(0)
     else:
         print("Encoding detection failed.")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
