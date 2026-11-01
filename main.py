@@ -37,6 +37,9 @@ def detect_encoding(file_path):
             return None
 
         with open(file_path, 'rb') as f:
+            # The whole file goes to chardet at once. Detection on a prefix would
+            # be cheaper, but chardet's answer can change as more bytes arrive, and
+            # I would rather report the whole file's encoding than its first block's.
             raw_data = f.read()
 
         # Use chardet to detect the encoding
@@ -45,6 +48,10 @@ def detect_encoding(file_path):
         confidence = result['confidence']
 
         if encoding:
+        # Confidence is logged and then ignored. A low confidence guess is
+        # returned exactly like a certain one, so the printed answer carries no
+        # hint of how much to trust it. Callers who need the confidence have to
+        # read the log line, not the result.
             logging.info(f"Detected encoding: {encoding} with confidence: {confidence}")
             return encoding
         else:
@@ -56,6 +63,9 @@ def detect_encoding(file_path):
         return None
 
 
+# Every failure in detect_encoding collapses to None: missing file, not
+# a file, unreadable, and chardet having no answer are indistinguishable
+# from here, and all of them print the same failure line and exit 1.
 def main():
     """
     Main function to parse arguments, detect encoding, and print the result.
